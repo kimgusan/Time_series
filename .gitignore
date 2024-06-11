@@ -1,0 +1,34 @@
+# gitignore template for Jupyter Notebooks
+# website: http://jupyter.org/
+
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+
+# IPython
+profile_default/
+ipython_config.py
+
+# Remove previous ipynb_checkpoints
+#   git rm -r .ipynb_checkpoints/
+
+b_classifier/dataset
+
+.DS_Store
+._.DS_Store
+**/.DS_Store
+**/._.DS_Store
+
+b_classifier/datasets/project_classifier/
+c_regression/datasets/
+d_dimension_reduction/datasets/
+b_classifier/datasets/
+c_regression/project/**/*.csv
+z_pythonProject/**/*.csv
+
+# Exclude callback_files directory from being ignored
+callback_files/
+
+# Exclude datasets directory from being ignored
+datasets/
+datasets/**
+
