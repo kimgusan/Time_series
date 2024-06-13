@@ -138,12 +138,23 @@
 
 <hr>
 
+## 금융 시장 수익률 (Financial Market Return)
+
+-   일반적으로 금융 시장을 분석하거나 머신러닝 모델을 구축할 때 price가 아닌 return을 활용하는 경우가 많다.
+-   수익률을 통해 복리계산과 연율화(1년 간의 성장률)등을 위해 무수히 많은 반복 계산을 하게 되므로 (1 + return)으로 계산할 경우 복잡하고 번거로워진다.
+-   기존 return에 log를 취해주면, 더 편한 계산이 가능해지지만 당연히 약간의 오차는 발생하게 된다.
+-   약간의 오차를 감수하고 로그를 사용함으로써 얻은 이득이 훨씬 많고, 국내 주식에서의 상한선과 하한선은 -30% ~ 30% 제약까지 있기 때문에 일반적인 주가 움직임에 대해 오차가 극히 적다.
+-   즉, 로그를 취하는 것은 정밀성보다 편의성을 높인 것으로 이해하면 된다.
+-   수익률 단위가 분, 초, 밀리초 이하로 내려가야 정밀성에 차이가 많이 발생하지만, 실제 금융시장에서는 최소 하루 단위 이상으로 계산하기 때문에 오차가 거의 발생하지 않게 된다.
+-   또한, return에 로그를 취하면 우측으로 치우친 확률 분포를 중심으로 재조정해주는 효과까지 있기 때문에 안쓸 이유가 없다.
+
 ## <div id='Prophep'>Prophet (비트코인 시장 예측)</div>
 
 -   페이스북에서 공계한 시계열 예측 라이브러리이다.
 -   정확도가 높고 빠르며 직관적인 파라미터로 모델 수정이 용이하다는 장점이 있다.
 -   Prophet 모델의 주요 구성요소는 Trend(주기적이지 않은 변화인 트랜드), Seasonality(주기적으로 나타나는 패턴 포함), Holiday(휴일과 같이 불규칙한 이벤트)
--   6번 코드를 참고할 것!
+-   7번 코드를 참고할 것!
+-   auto_arima의 경우 8번 코드를 참고할 것!!!!
 
 ## <div>Code Advanced</div>
 
@@ -325,6 +336,213 @@
 </details>
 
 <details>
-    <summary>6. Prophet (비트코인 분석)</summary>
+    <summary>6. 금융시장 수익률 시각화 및 골든, 데드 크로스 / auto_arima / </summary>
+
+</details>
+
+<details>
+    <summary>7. Prophet (비트코인 분석)</summary>
+
+    # 비트코인 데이터 가져오기
+    import pandas as pd
+    import json
+
+    with open('./datasets/bitcoin_2010_2024.json') as f:
+        json_data = json.load(f)
+
+    bitcoin_df = pd.DataFrame(json_data['market-price'])
+    bitcoin_df
+
+---
+
+    # 밀리초로 표기되어 있는 독립변수에 대하여 문자열(연-월-일 변경)
+    from datetime import datetime
+
+    def changeDate(milis):
+        timestamp = milis / 1000
+        converted_time = datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d')
+        return converted_time
+
+    # apply 함수 적용
+    bitcoin_df.x = bitcoin_df.x.apply(changeDate)
+    bitcoin_df
+
+---
+
+    # 독립변수로 존재하는 시계열 데이터 index로 변환
+    bitcoin_df.set_index('x', inplace=True)
+    bitcoin_df
+
+---
+
+    # 인덱스 번호 DatetimeIndex  로 변환
+    bitcoin_df.index = pd.to_datetime(bitcoin_df.index)
+    bitcoin_df.info()
+
+---
+
+    # prophet을 사용하기 위해서 시계열 인덱스를 독립변수로 변경 (reset_index())
+    pre_b_df = bitcoin_df.reset_index()
+    pre_b_df
+
+---
+
+    # prophet 모델을 사용하기 위해 시계열 인덱스를 ds 라는 독립변수로 선언해줘야 한다.
+    pre_b_df = pre_b_df.rename(columns={'x': 'ds'})
+    pre_b_df
+
+---
+
+    # Prophet 훈련
+    from prophet import Prophet
+
+    model = Prophet().fit(pre_b_df)
+
+---
+
+    # 향후 365일간의 예측을 위해 미래 데이터프레임 생성
+    future = model.make_future_dataframe(periods=365)
+
+    # 미래 데이터프레임을 사용하여 예측 수행
+    forecast = model.predict(future)
+
+    # 실제로 예측한 값이 정확하지 않을 수 있으며 그렇기 때문에 신뢰구간을 주의 깊게 봐야한다.
+    # yhat: 예측한 값
+    # yhat_lower, yhat_upper: 예측 신뢰 구간의 하한과 상한
+    forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail()
+
+---
+
+    # 실제 값과 향후 예측한 모델에 대한 시각화
+    fig, ax = plt.subplots(1, 1, figsize=(12, 6))
+
+    plt.plot(pre_b_df[['y']], label='Train')
+    plt.plot(forecast[['yhat']], label='Prediction')
+    plt.legend()
+    plt.show()
+
+---
+
+    # 실제 값과 향후 예측한 모델에 신뢰 구간이 포함된 대한 시각화
+    model.plot(forecast, figsize=(15, 8), xlabel='year-month', ylabel='price')
+    plt.show()
+
+---
+
+    # 추세, 요일, 월간 시각화 그래프 (옵션 사용 시 일간, 공유일 효과 추가 할 수 있음)
+    model.plot_components(forecast, figsize=(20, 20))
+    plt.show()
+
+</details>
+
+<details>
+    <summary>9. Prophet-하이퍼 파라미터 조절!! (비트코인 분석)</summary>
+    
+    # train 데이터프레임을 사용하여 분석 후 test 데이터프레임을 사용하여 오차 확인 및 예측 진행
+    # 80% train 데이터 분리
+    train_df = pre_b_df.iloc[:int(len(pre_b_df) * 0.8)]
+    train_df
+
+---
+
+    from prophet import Prophet
+    from prophet.diagnostics import cross_validation, performance_metrics
+    # itertools : 각 요소에 대하여 경우의 수 별로 묶어 줄 수 있도록 사용되는 라이브러리
+    import itertools
+
+    # changepoint_prior_scale: trend의 변화하는 크기를 반영하는 정도이다, 0.05가 default
+    # seasonality_prior_scale: 계절성을 반영하는 단위이다.
+    # seasonality_mode: 계절성으로 나타나는 효과를 더해 나갈지, 곱해 나갈지 정한다.
+
+    # 왠만해서는 해당 수치로 분석할 것
+    search_space = {
+        'changepoint_prior_scale': [0.05, 0.1, 0.5, 1.0, 5.0, 10.0],
+        'seasonality_prior_scale': [0.05, 0.1, 1.0, 10.0],
+        'seasonality_mode': ['additive', 'multiplicative']
+    }
+
+    # itertools.product(): 각 요소들의 모든 경우의 수 조합으로 생성
+
+    param_combinded = [dict(zip(search_space.keys(), v)) for v in itertools.product(*search_space.values())]
+
+    # 데이터셋 분할 후 길이 확인: 80% 훈련 데이터, 20% 테스트 데이터
+    train_len = int(len(pre_b_df) * 0.8)
+    test_len = int(len(pre_b_df) * 0.2)
+
+    # 평가 시 dats 라는 문구가 붙어야 하기 때문에 f-string을 이용한 구문 생성
+    train_size = f'{train_len} days'
+    test_size = f'{test_len} days'
+    train_df = pre_b_df.iloc[: train_len]
+    test_df = pre_b_df.iloc[train_len: ]
+
+     모델의 성능 평가를 위한 MAPE 값을 저장할 리스트
+    mapes = []
+    for param in param_combinded:
+        model = Prophet(**param)
+        model.fit(train_df)
+
+            # 'threads' 옵션은 메모리 사용량은 낮지만 CPU 바운드 작업에는 효과적이지 않을 수 있다.
+            # 'dask' 옵션은 대규모의 데이터를 처리하는 데 효과적이다.
+            # 'processes' 옵션은 각각의 작업을 별도의 프로세스로 실행하기 때문에 CPU 바운드 작업에 효과적이지만,
+            # 메모리 사용량이 높을 수 있다.
+
+            # 모델의 교차검증을 수행하여 모델의 예측 성능 평가하는데 사용
+            # 일반화 성능을 평가
+            # initial: 초기 훈련 데이터의 기간, period: 예측을 수행할 간격, horizon: 훈련 단계 후 예측할 기간, parallel: 병렬 처리 방식
+            cv_df = cross_validation(model, initial=train_size, period='20 days', horizon=test_size, parallel='processes')
+
+            # 모델의 성능을 평가하여 MAPE 값을 계산
+            # performance_metrics: 모델의 성능을 평가하는 메소드
+            df_p = performance_metrics(cv_df, rolling_window=1)
+            mapes.append(df_p['mape'].values[0])
+
+    # 튜닝 결과를 데이터프레임으로 저장
+    tuning_result = pd.DataFrame(param_combinded)
+    tuning_result['mape'] = mapes
+
+---
+
+    # 최적의 튜닝 결과를 확인
+    tuning_result.sort_values(by='mape')
+
+---
+
+    # 최적의 하이퍼파라미터 값으로 model을 다시 훈련 시켜서 값을 확인
+    model = Prophet(changepoint_prior_scale=0.5,
+                    seasonality_prior_scale=0.1,
+                    seasonality_mode='multiplicative')
+
+    model.fit(pre_b_df)
+    future = model.make_future_dataframe(periods=365)
+    forecast = model.predict(future)
+    forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']][221:]
+
+---
+
+    # 시계열 데이터프레임으로 다시 만들어 시각화를 편하게 하기위하여 인덱스 재정의 후 데이터 프레임 재선언
+    b_df = pre_b_df.copy()
+    b_df.set_index('ds', inplace=True)
+
+    # 예측 결과 데이터 프레임 생성
+    forecast_df = forecast.copy()
+    forecast_df = forecast_df.set_index('ds')
+
+    b_df.index = pd.to_datetime(b_df.index)
+    forecast_df.index = pd.to_datetime(forecast_df.index)
+
+    # 시각화
+    fig, ax = plt.subplots(1, 1, figsize=(12, 6))
+    plt.plot(b_df[['y']], label='Train')
+    plt.plot(forecast_df[['yhat']], label='Prediction')
+    plt.legend()
+    plt.show()
+
+---
+
+    model.plot(forecast, figsize=(15, 8), xlabel='year-month', ylabel='price')
+    plt.show()
+
+    model.plot_components(forecast, figsize=(20, 20))
+    plt.show()
 
 </details>
