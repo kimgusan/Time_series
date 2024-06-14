@@ -147,6 +147,7 @@
 -   즉, 로그를 취하는 것은 정밀성보다 편의성을 높인 것으로 이해하면 된다.
 -   수익률 단위가 분, 초, 밀리초 이하로 내려가야 정밀성에 차이가 많이 발생하지만, 실제 금융시장에서는 최소 하루 단위 이상으로 계산하기 때문에 오차가 거의 발생하지 않게 된다.
 -   또한, return에 로그를 취하면 우측으로 치우친 확률 분포를 중심으로 재조정해주는 효과까지 있기 때문에 안쓸 이유가 없다.
+-   골든 크로스, 데드 크로스 관련 및 내용에 대해서는 6번 코드 확인.
 
 ## <div id='Prophep'>Prophet (비트코인 시장 예측)</div>
 
@@ -337,6 +338,272 @@
 
 <details>
     <summary>6. 금융시장 수익률 시각화 및 골든, 데드 크로스 / auto_arima / </summary>
+
+    # 수익률을 구히기 위해 shift 를 사용해서 이동 시켜서 값을 확인 한다
+    # (이유: 수익률 => 오늘 수익값 / 어제 수익값 * 100)
+    display(f_df.shift(1).head(4))
+    display(f_df.head(4))
+    display(f_df.shift(-1).head(4))
+
+---
+
+    import numpy as np
+
+    # 수익률 df
+    rate_f_df = np.log(f_df / f_df.shift(1))
+    rate_f_df
+
+---
+
+    # 일간 수익률
+
+    rate_f_df[['AAPL', 'MSFT', 'INTC', 'AMZN', 'SPY', 'GLD']].plot(figsize=(10, 5), lw=0.5)
+
+---
+
+    # 연율화
+    # 연간 영업일(약 252일로 계산)
+    # 252 = (통상적으로) 1년 영업률
+
+    # 해당 코드는 log가 씌워져있는 상황
+    rate_f_df.mean() * 252
+
+---
+
+    # 만약 단변량 데이터가 아닌 다변량 데이터 일 경우 다중 공선성에 대한 부분도 확인 하는 것이 도움이 될 것.
+    import pandas as pd
+    from statsmodels.stats.outliers_influence import variance_inflation_factor
+
+    def get_vif(features):
+        vif = pd.DataFrame()
+        vif["vif_score"] = [variance_inflation_factor(features.values, i) for i in range(features.shape[1])]
+        vif["feature"] = features.columns
+        return vif
+
+---
+
+    rate_f_df = rate_f_df.dropna()
+    get_vif(rate_f_df)
+
+---
+
+    # 각 원소들의 누적합 : cumsum()
+    # 일간 수익률
+    rate_f_df.cumsum().apply(np.exp).plot(figsize=(12, 6))
+    plt.show()
+
+    # 월간 수익률
+    rate_f_df.cumsum().apply(np.exp).resample('1m').last().plot(figsize=(12, 6))
+    plt.show()
+
+---
+
+    # 아마존 주식 시장 그래프 확인
+    window = 20
+
+    amzn_df['min'] = amzn_df['AMZN'].rolling(window=window).min()
+    amzn_df['mean'] = amzn_df['AMZN'].rolling(window=window).mean()
+    amzn_df['std'] = amzn_df['AMZN'].rolling(window=window).std()
+    amzn_df['median'] = amzn_df['AMZN'].rolling(window=window).median()
+    amzn_df['max'] = amzn_df['AMZN'].rolling(window=window).max()
+
+    amzn_df = amzn_df.dropna()
+    amzn_df
+
+---
+
+    import matplotlib.pyplot as plt
+
+    ax = amzn_df[['min', 'mean', 'max']].iloc[-252:].plot(figsize= (12, 6), style=['g--','r--','g--'], lw=0.8)
+    amzn_df['AMZN'].iloc[-252:].plot(ax=ax)
+    plt.title("AMZN 20-Day Moving Average Price Movement")
+    plt.show()
+
+---
+
+    # SMA(Simple Moving Average): 일정 기간동안의 가격의 평균을 나타내는 보조지표
+    # 1달 영업일을 21일로 가정, 1년 영업일을 252일로 가정
+
+    # 단기
+    amzn_df['SMA1'] = amzn_df['AMZN'].rolling(window=21).mean() #short-term
+    # 장기
+    amzn_df['SMA2'] = amzn_df['AMZN'].rolling(window=252).mean() #long-term
+
+    amzn_df[['AMZN', 'SMA1', 'SMA2']].tail()
+
+---
+
+    # 아마존 주가 기술 분석
+    # 골든 크로스, 데드 크로스
+    amzn_df.dropna(inplace=True)
+
+    amzn_df['positions'] = np.where(amzn_df['SMA1'] > amzn_df['SMA2'], 1, -1)  # 1: buy , -1: sell /
+
+    ax = amzn_df[['AMZN', 'SMA1', 'SMA2', 'positions']].plot(figsize=(15, 6), secondary_y='positions')
+    ax.get_legend().set_bbox_to_anchor((-0.05, 1))
+
+    plt.title("AMZN Trading Window based on Technical Analysis")
+    plt.show()
+
+</details>
+
+<details>
+    <summary>6-1. auto_arima 및 model 지표(MAPE)</summary>
+
+    # 훈련 데이터와 검증 데이터 분리
+    y_train = amzn_df['AMZN.O'][:int(0.8 * len(amzn_df))]
+    y_test = amzn_df['AMZN.O'][int(0.8 * len(amzn_df)):]
+
+
+    from pmdarima.arima import ndiffs
+    # KPSS(Kaiatkowski-Phillips-Schmidt-Shin)
+    # 차분을 진행하는 것이 필요할 지 결정하기 위해 사용하는 한 가지 검정 방법
+    # 영가설(귀무가설)을 "데이터의 정상성이 나타난다."로 설정한 뒤
+    # 영가설이 거짓이라는 증거를 찾는 알고리즘이다.
+    # alpha: 강도, max_d: 최대 차분 횟수
+
+    kpss_diffs = ndiffs(y_train, alpha=0.05, test='kpss', max_d=6)
+    adf_diff = ndiffs(y_train, alpha=0.05, test='adf', max_d=6)
+    pp_diff = ndiffs(y_train, alpha=0.05, test='pp', max_d=6)
+
+    # 이 3개 중 최대값을 가져오면 된다.
+    n_diffs = max(kpss_diffs, adf_diff, pp_diff)
+
+    print(f"d = {n_diffs}")
+
+---
+
+    # auto_arima: AR, 차분 횟수, MA 차수 확인
+    # auto_arima 함수는 ARIMA 모델의 최적의 매개변수를 자동으로 찾기 위한 함수입니다.
+    # y: 훈련시킬 데이터 시계열
+    # d: 차분 횟수 (시계열 데이터를 정상화하기 위해 필요)
+    # start_p: AR(p)의 초기값 (AR 모델의 차수의 초기값)
+    # max_p: AR(p)의 최대값 (AR 모델의 차수의 최대값)
+    # start_q: MA(q)의 초기값 (MA 모델의 차수의 초기값)
+    # max_q: MA(q)의 최대값 (MA 모델의 차수의 최대값)
+    # m: 계절성을 띄는 경우 주기 (계절성 주기 설정)
+    # seasonal: 계절성을 사용할지 여부 (True 또는 False)
+    # stepwise: stepwise 알고리즘을 사용할지 여부 (True로 설정하면 자동으로 최적의 모델을 찾음)
+    # trace: 최적화 과정을 출력할지 여부 (True로 설정하면 과정이 출력됨)
+
+    model = pm.auto_arima(y = y_train,
+                        d=1,
+                        start_p=0,
+                        max_p=3,
+                        start_q=0,
+                        max_q=3,
+                        m=1,
+                        seasonal=False,
+                        stepwise=True,
+                        trace=True)
+
+---
+
+    model.fit(y_train)
+
+---
+
+    # Prob(Q), 융-박스 검정 통계량
+    # 영가설: 잔차가 백색잡음 시계열을 따른다. ** 백색잡음 : 분포를 잡을 수 있는 정도의 시계열
+    # 0.05 이상: 서로 독립적이고 동일한 분포를 따른다.
+
+    # Prob(H), 이분산성 검정 통계량
+    # 영가설: 잔차기 이분산성을 띄지 않는다.
+    # 0.05 이상: 잔차의 분산이 일정하다.
+
+    # Prob(JB), 자크-베라 검정 통계량
+    # 영가설: 잔차가 정규성을 따른다.
+    # 0.05 이상: 일정한 평균과 분산을 따른다.
+
+    # 이 3가지 검증을 가지고 금융 데이터에서 어떤 상품을 추천할 지 예측할 수 있음 (장기적 투가는 고위험, 단기 투자 권장) 이런식으로 작성
+
+    # Skew(쏠린 정도, 왜도)
+    # 0에 가까워야 한다.
+
+    # Kurtosis(뾰족한 정도, 첨도)
+    # 3에 가까워야 한다.
+
+    print(model.summary())
+
+    # N(0, 1) 정규분포
+
+---
+
+    import matplotlib.pyplot as plt
+
+    model.plot_diagnostics(figsize=(16, 8))
+    plt.show()
+
+---
+
+    # y_test를 아는 것 만큼 비교가 가능하기 때문에 predict 진행 시 주기를 적어준다.
+    # 이건 잘못된 경우 : 다음 차수 1개에 대한 패턴으로 계속 신뢰구간이 증가되며
+    # 정상적으로 할때는 다음 차수의 값을 결정한 후 추가 update를 해줘야 함
+
+    # 현재는 유사한 양상으로 약 3 정도가 지속적으로 증가함.
+    prediction = model.predict(len(y_test))
+    prediction
+
+---
+
+    # 신뢰구간의 평균값이 예측값이다.
+    prediction, conf_int = model.predict(n_periods =1, return_conf_int=True)
+    print(conf_int)
+    print(prediction)
+
+---
+
+    # 지속적으로 업데이트를 하기 위한 방법 (예측은 한발자국씩 진행되어야 함)
+    prediction.tolist()[0]
+
+---
+
+    # 지속적으로 업데이트를 하기 위한 함수 선언. (예측은 한발자국씩 진행되어야 함)
+    def predict_one_step():
+        prediction = model.predict(n_periods =1)
+        return (prediction.tolist()[0])
+
+---
+
+    # 예측된 횟수(step) 및 예측된 값을 통해서 model 을 지속적으로 update 하기 위한 반복문.
+    preds = []
+    p_list = []
+
+    for data in y_test:
+        p = predict_one_step()
+        p_list.append(p)
+
+        model.update(data)
+
+---
+
+    # test 데이터와 model이 예측한 데이터의 정도를 비교하기 위한 데이터 프레임 생성.
+    y_predict_df = pd.DataFrame({"test": y_test, "pred": p_list})
+    y_predict_df
+
+---
+
+    # auto_arima 를 이용한 데이터 시각화
+    fig, ax = plt.subplots(1, 1, figsize=(12, 6))
+
+    plt.plot(y_train.iloc[-50:], label='Train')
+    plt.plot(y_test.iloc[-50:], label='Test')
+    plt.plot(y_predict_df.pred, label='Prediction')
+    plt.legend()
+    plt.show()
+
+---
+
+    # auto_arima 를 이용한 test 데이터 검증(MAPE).
+
+    import numpy as np
+
+    # MAPE (Mean Absolute Percentage Error): 에러의 절대값의 평균 함수 생성
+    # 평균 절대 백분율 오차
+    def MAPE(y_test, y_pred):
+        return np.mean(np.abs((y_test - y_pred) / y_test)) * 100
+
+    print(f'MAPE (%): {MAPE(y_test, p_list):.4f}')
 
 </details>
 
