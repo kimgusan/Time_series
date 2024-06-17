@@ -618,7 +618,8 @@
 
 <img width="692" alt="스크린샷 2024-06-17 오후 11 33 03" src="https://github.com/kimgusan/Time_series/assets/156397911/5e340d17-ff14-46f2-bfcb-4220fa8571a2">
 
-<img width="963" alt="스크린샷 2024-06-17 오후 11 30 54" src="https://github.com/kimgusan/Time_series/assets/156397911/71fa9adf-4606-4a18-b379-6368d73998f6">
+<img width="963" alt="스크린샷 2024-06-17 오후 11 30 54" src="https://github.com/kimgusan/Time_series/assets/156397911/71fa9adf-4606-4a18-b379-6368d73998f6">  
+
 출처: https://www.weforum.org/agenda/2021/01/electric-vehicles-breakthrough-tesla-china
 
 -   ARIMA 모델을 사용하여 2013년부터 2024년까지의 데이터를 평가한 결과, 예측 오차가 x 정도로 나타났으며 모델 평가가 좋았다고 판단됩니다.
