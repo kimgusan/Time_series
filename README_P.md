@@ -290,11 +290,11 @@
     p-값이 0.38로 높아, 잔차가 독립적이고 동일한 분포를 따르고 있음을 나타냅니다.
 
     2. Jarque-Bera (JB)
-    - Jarque-Bera (JB): 11447.41, Prob(JB): 0.00: Jarque-Bera 검정은 잔차의 정규성을 확인하는 테스트입니다.
+    - Jarque-Bera (JB): 8174.96, Prob(JB): 0.00: Jarque-Bera 검정은 잔차의 정규성을 확인하는 테스트입니다.
     p-값이 0.00으로 매우 낮아, 잔차가 정규분포를 따르지 않음을 나타냅니다.
 
     3. Heteroskedasticity (H)
-    Heteroskedasticity (H): 20.91, Prob(H): 0.00: 이분산성을 확인하는 테스트입니다.
+    Heteroskedasticity (H): 0.00, Prob(H): 0.00: 이분산성을 확인하는 테스트입니다.
     p-값이 0.00으로 매우 낮아, 잔차의 분산이 일정하지 않음을 나타냅니다.
 
     4. Skew: -0.09: 왜도를 나타냅니다. 값이 0에 가까울수록 대칭 분포를 나타내며, 음수값은 꼬리가 왼쪽으로 긴 분포를 의미합니다.
@@ -382,7 +382,7 @@
     
 </details>
 
-> 모델 평가를 진행했을 때 분포는 준수한 성능을 보이는 것으로 판단.
+> 모델 평가를 진행했을 때 분포는 준수한 성능을 보이는 것으로 판단.  
 > Mean Squared Error 1.11  
 > Root Mean Squared Error 1.05  
 > Mean Squared Log Error 0.004
@@ -446,7 +446,6 @@
 #### 4-2. Prophet 파라미터 조정 없이 default 값으로 훈련 진행
 
 <img width="887" alt="스크린샷 2024-06-17 오후 11 10 35" src="https://github.com/kimgusan/Time_series/assets/156397911/6cec2be2-d2fe-42d5-9ea6-ac947794b30c">
-<img width="1005" alt="스크린샷 2024-06-17 오후 11 11 09" src="https://github.com/kimgusan/Time_series/assets/156397911/3f070a3f-ad2f-40cc-b8c6-36c01d66ad2e">
 
 > 2020 년 이후 신뢰구간을 실측값이 신뢰구간을 벗어나는 부분 확인하여 파라미터 조정하는 방향으로 진행.
 
@@ -491,7 +490,7 @@
 <img width="898" alt="스크린샷 2024-06-17 오후 11 19 42" src="https://github.com/kimgusan/Time_series/assets/156397911/c10d92a1-1e8d-4f35-8e0a-acc4a682f479">
 <img width="975" alt="스크린샷 2024-06-17 오후 11 19 50" src="https://github.com/kimgusan/Time_series/assets/156397911/afa5e850-dc8b-4ae0-8c1a-074188204ba3">
 
-> 이전 모델과 비교하였을 때 실측값이 조금 더 신뢰구간에 가까워 진 부분 확인.
+> 이전 모델과 비교하였을 때 실측값이 조금 더 신뢰구간에 가까워 진 부분 확인.  
 > 예측 결과가 비정상적으로 불안정한 부분 확인, seasonality_mode를 변경하여 덧셈 방식으로 변경 후 추가 훈련 진행.
 
 -   changepoint_prior_scale=1,
