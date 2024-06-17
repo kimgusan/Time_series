@@ -40,10 +40,10 @@
 
 #### 1-1. 금 가격과 리튬 ETF 시계열 데이터 유형 확인.
 
-**이미지 넣어주세요!**
+<img width="993" alt="스크린샷 2024-06-17 오후 5 08 11" src="https://github.com/kimgusan/Time_series/assets/156397911/bc9087f2-ab7d-4ba0-8b79-f46708fe6076">
 
-> > 2013년 01월 ~ 2024년 06월 14일 까지의 그래프를 봤을 때 계절성이나 별도의 추세는 보이지 않는 그래프를 확인.  
-> > 이때, 리튬 베터리의 그래프가 2020년 부터 급격하게 반등한 부분을 확인할 수 있음.
+> 2013년 01월 ~ 2024년 06월 14일 까지의 그래프를 봤을 때 계절성이나 별도의 추세는 보이지 않는 그래프를 확인.  
+> 이때, 리튬 베터리의 그래프가 2020년 부터 급격하게 반등한 부분을 확인할 수 있음.
 
 ### 2. 데이터 전처리 (ACF, PACF 등)
 
@@ -74,12 +74,20 @@
 
 </details>
 
-#### 2-1. 금 가격과 리튬 ETF 시계열 그래프 유형 확인.
+#### 2-1. 금 가격과 리튬 ETF 시계열 그래프 유형 확인(ACF, PACF 활용).
 
-**이미지 넣어주세요!**
+<img width="876" alt="스크린샷 2024-06-17 오후 5 09 55" src="https://github.com/kimgusan/Time_series/assets/156397911/b6efbb22-bb03-4c0c-b76a-e1f73dc4189d">
 
-> > 금과 리튬 ETF 시계열 데이터 모두 정상성을 띄지 않는 비정상 시계열 데이터임을 확인.  
-> > 이후 모델 평가 진행 시 차분을 통한 데이터 유형 변경 필요.
+<img width="876" alt="스크린샷 2024-06-17 오후 5 12 28" src="https://github.com/kimgusan/Time_series/assets/156397911/302dc8fd-aedd-4404-b8e0-5d7691643db5">
+
+> 금과 리튬 ETF 시계열 데이터 모두 정상성을 띄지 않는 비정상 시계열 데이터임을 확인.  
+> 이후 모델 평가 진행 시 차분을 통한 데이터 유형 변경 필요.
+
+#### 2-2. 금 가격과 리튬 ETF 변화율 확인.
+
+<img width="430" alt="스크린샷 2024-06-17 오후 5 22 38" src="https://github.com/kimgusan/Time_series/assets/156397911/df26f566-b06d-4610-9ea0-38a09d4fe981">
+
+> 금보다는 리튬 ETF의 변화율 큰 부분 확인.
 
 <details>
     <summary>금 가격과 리튬 ETF 시계열 데이터 변화율 및 수익률 확인.</summary>
@@ -119,30 +127,31 @@
 
 </details>
 
-#### 2-2. 금 가격과 리튬 ETF 다중공산성 확인.
+#### 2-3. 금 가격과 리튬 ETF 다중공산성 확인.
 
-**이미지 넣어주세요!**
+<img width="170" alt="스크린샷 2024-06-17 오후 5 17 01" src="https://github.com/kimgusan/Time_series/assets/156397911/86d4226d-69dc-4762-8af9-26eb1a1b7a71">
 
-> > 금 가격과 리튬 ETF에 대해서는 다중공산성이 존재 하지 않는 것으로 확인.
+> 금 가격과 리튬 ETF에 대해서는 다중공산성이 존재 하지 않는 것으로 확인.
 
-#### 2-3. 금 가격과 리튬 ETF 일간 & 월간 수익률 확인.
+#### 2-4. 금 가격과 리튬 ETF 일간 & 월간 수익률 확인.
 
-**이미지 넣어주세요!**
+<img width="894" alt="스크린샷 2024-06-17 오후 5 26 10" src="https://github.com/kimgusan/Time_series/assets/156397911/c5d6f557-4e77-4a52-bff8-0584c7ef5608">
+<img width="894" alt="스크린샷 2024-06-17 오후 5 27 15" src="https://github.com/kimgusan/Time_series/assets/156397911/002537a5-82ca-48c4-bac6-95f6c0306a2a">
+<img width="884" alt="스크린샷 2024-06-17 오후 5 27 27" src="https://github.com/kimgusan/Time_series/assets/156397911/8cd68c80-3287-4b0c-9a10-878a65a04848">
 
-> > 리튬 ETF 의 경우 특정 시기에 높은 수익율을 보이고 있지만, 단발성인 부분을 확인할 수 있다.
+> 리튬 ETF 의 경우 특정 시기에 높은 수익율을 보이고 있지만, 단발성인 부분 확인.
 
-#### 2-4. 리튬 ETF 차분 진행 시 정상성을 띄는 그래프 확인.
+#### 2-5. 리튬 ETF 차분 진행 시 정상성을 띄는 그래프 확인.
 
-**이미지 넣어주세요!**
+<img width="978" alt="스크린샷 2024-06-17 오후 5 21 19" src="https://github.com/kimgusan/Time_series/assets/156397911/bc3e7e12-bd9d-4cf3-be4f-bb43a0231265">
+> 해당 데이터를 사용하기 위해 비정상 시계열에서 차분을 사용하여 정상 시계열 데이터로 변경하였을 때 어느정도 부분이 나타나는 것을 확인.
 
-> > 해당 데이터를 사용하기 위해 비정상 시계열에서 차분을 사용하여 정상 시계열 데이터로 변경하였을 때 어느정도 부분이 나타나는 것을 확인.
+#### 2-6. 리튬 ETF에 대하여 SMA를 적용하여 골든 크로스, 데드크로스 확인.
 
-#### 2-5. 리튬 ETF에 대하여 SMA를 적용하여 골든 크로스, 데드크로스 확인.
+<img width="995" alt="스크린샷 2024-06-17 오후 5 28 50" src="https://github.com/kimgusan/Time_series/assets/156397911/70774076-8beb-408a-9608-708f4e92e47e">
+<img width="995" alt="스크린샷 2024-06-17 오후 5 30 15" src="https://github.com/kimgusan/Time_series/assets/156397911/5b4b3648-e37a-44e1-8905-acda9f1e25b7">
 
-**평균 이미지 넣어주세요!**  
-**골든 크로스 이미지 넣어주세요!**
-
-> > 2020년도에 리튬 ETF가 상승했던 사유가 있는지 확인이 필요히며 shock로 볼 수 있는 부분을 시사.
+> 2020년도에 리튬 ETF가 2020년 이후 크게 상승한 부분이 있지만 2022년 이후에 하락세를 보이고 있으며 2020년 이전 분포 까지 내려가려는 추세 확인.
 
 <details>
     <summary>골든 크로스, 데드 크로스 그래프 </summary>
@@ -199,7 +208,7 @@
 
 #### 3-1. KPSS, ADF, PP 테스트를 통한 차분 횟수 확인
 
-> > 차분 횟수: 2
+> 차분 횟수: 2
 
 <details>
     <summary>PSS, ADF, PP 테스트를 통한 차분 횟수 확인.</summary>
@@ -228,7 +237,8 @@
 
 #### 3-2. auto_arima를 활용한 AR 차수, MA 차수, 차분 횟수 확인.
 
-**이미지를 넣어주세요**
+<img width="268" alt="스크린샷 2024-06-17 오후 5 33 24" src="https://github.com/kimgusan/Time_series/assets/156397911/a9f785bf-3197-4402-bff3-f46823c08774">
+
 
 <details>
     <summary>auto_arima 사용</summary>
@@ -264,9 +274,9 @@
 
 #### 3-3. ARIMA 모델에 대하여 SARIMAX Results 확인.
 
-**이미지를 넣어주세요**
+<img width="613" alt="스크린샷 2024-06-17 오후 5 34 23" src="https://github.com/kimgusan/Time_series/assets/156397911/b85a96c7-9fdd-4ad4-bd87-6574bc967ef7">
 
-> > 추가 통계량 해석
+> 추가 통계량 해석
 
     1. Ljung-Box (L1) (Q)
     - Ljung-Box (L1) (Q): 0.77, Prob(Q): 0.38: Ljung-Box 검정은 잔차가 백색잡음인지 확인하는 테스트입니다.
@@ -295,16 +305,19 @@
     - 단기 투자: 잔차가 백색잡음 분포를 따르므로, 단기적으로는 예측 가능성이 높아 단기 투자가 더 적합할 수 있습니다.
     이러한 해석을 바탕으로 모델의 적합성과 예측의 신뢰성을 평가할 수 있습니다.
 
+<img width="979" alt="스크린샷 2024-06-17 오후 5 39 05" src="https://github.com/kimgusan/Time_series/assets/156397911/ac833e27-1acd-472a-96c3-d64045f013c6">
+
+
 #### 3-4. 모델 평가
 
 **이미지를 넣어주세요**
 **이미지를 넣어주세요**
 
-> 모델 평가를 진행했을 때 분포?? 는 준수한 성능을 보이는 것으로 판단.
->
-> > Mean Squared Error 1.11  
-> > Root Mean Squared Error 1.05  
-> > Mean Squared Log Error 0.004
+> 모델 평가를 진행했을 때 분포는 준수한 성능을 보이는 것으로 판단.
+> MAPE (%) : 1.6601
+> Mean Squared Error 1.11  
+> Root Mean Squared Error 1.05  
+> Mean Squared Log Error 0.004
 
 <details>
     <summary>ARIMA 모델을 사용한 리튬 ETF 평가</summary>
