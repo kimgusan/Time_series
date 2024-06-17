@@ -237,7 +237,14 @@
 
 #### 3-2. auto_arima를 활용한 AR 차수, MA 차수, 차분 횟수 확인.
 
-<img width="268" alt="스크린샷 2024-06-17 오후 5 33 24" src="https://github.com/kimgusan/Time_series/assets/156397911/a9f785bf-3197-4402-bff3-f46823c08774">
+<div style="display: flex; justify-content: space-around;">
+  <div>
+    <img src="https://github.com/kimgusan/Time_series/assets/156397911/a9f785bf-3197-4402-bff3-f46823c08774" alt="Image 1" style="width: 300px;">
+  </div>
+  <div>
+    <img src="https://github.com/kimgusan/Time_series/assets/156397911/e0a6f856-149e-4611-a298-2293606a6189" alt="Image 2" style="width: 300px;">
+  </div>
+</div>
 
 
 <details>
@@ -272,7 +279,7 @@
 
 </details>
 
-#### 3-3. ARIMA 모델에 대하여 SARIMAX Results 확인.
+#### 3-3. auto_arima 모델에 대하여 SARIMAX Results 확인 및 평가.
 
 <img width="613" alt="스크린샷 2024-06-17 오후 5 34 23" src="https://github.com/kimgusan/Time_series/assets/156397911/b85a96c7-9fdd-4ad4-bd87-6574bc967ef7">
 
@@ -307,17 +314,79 @@
 
 <img width="979" alt="스크린샷 2024-06-17 오후 5 39 05" src="https://github.com/kimgusan/Time_series/assets/156397911/ac833e27-1acd-472a-96c3-d64045f013c6">
 
+<img width="888" alt="스크린샷 2024-06-17 오후 10 51 58" src="https://github.com/kimgusan/Time_series/assets/156397911/0783018f-ac27-4cee-b1d9-c6152ee1d682">
 
-#### 3-4. 모델 평가
+<details>
+    <summary>auto_arima 사용 시 단계별 예측 수행 코드</summary>
 
-**이미지를 넣어주세요**
-**이미지를 넣어주세요**
+    prediction = model.predict(len(y_test))
+    prediction
+---
+    # 신뢰구간의 평균값이 예측값이다.
+    prediction, conf_int = model.predict(n_periods =1, return_conf_int=True)
+    print(conf_int)
+    print(prediction)
+---
+    # 지속적으로 업데이트를 하기 위한 방법 (예측은 한발자국씩 진행되어야 함)
+    prediction.tolist()[0]
+
+---
+    # 지속적으로 업데이트를 하기 위한 방법 (예측은 한발자국씩 진행되어야 함)
+    def predict_one_step():
+        prediction = model.predict(n_periods =1)
+        return (prediction.tolist()[0])
+---
+    preds = []
+    p_list = []
+    
+    for data in y_test:
+        p = predict_one_step()
+        p_list.append(p)
+    
+        model.update(data)
+---
+    y_predict_df = pd.DataFrame({"test": y_test, "pred": p_list})
+    y_predict_df
+    
+</details>
+
+> MAPE (%) : 1.6601
+
+
+#### 3-4. ARIMA 모델 평가.
+
+<img width="993" alt="스크린샷 2024-06-17 오후 10 59 55" src="https://github.com/kimgusan/Time_series/assets/156397911/a5482310-47d0-417c-bbd3-a7f51736c685">
+
+<details>
+    <summary>ARIMA 모델을 사용하여 모델 평가</summary>
+    from statsmodels.tsa.arima.model import ARIMA
+    
+    model = ARIMA(pre_l_df, order=(4, 2, 0))
+    model_fit = model.fit()
+    
+    start_index = pd.to_datetime('2013-01-02')
+    end_index = pd.to_datetime('2024-06-14')
+    
+    # 이 부분은 추가적인 예측이 아니라 기존 실제 데이터에서 모델 평가를 하는 부분
+    forecast = model_fit.predict(start=start_index, end=end_index)
+    
+    plt.figure(figsize=(15, 8))
+    
+    # 실제 시계열 데이터
+    plt.plot(pre_l_df['2021':], label='original')
+    # model을 훈련시켜서 나온 결과에 대한 모델 검증
+    plt.plot(forecast['2021':], label='predicted', c='orange')
+    plt.title("Time Series Forecast (2023.01 ~ 2024.06.14)")
+    plt.legend()
+    plt.show()
+    
+</details>
 
 > 모델 평가를 진행했을 때 분포는 준수한 성능을 보이는 것으로 판단.
-> MAPE (%) : 1.6601
 > Mean Squared Error 1.11  
 > Root Mean Squared Error 1.05  
 > Mean Squared Log Error 0.004
+
 
 <details>
     <summary>ARIMA 모델을 사용한 리튬 ETF 평가</summary>
@@ -359,8 +428,10 @@
 
 ### 4. 딥러닝 (Prophet) 모델 사용 및 예측
 
-4-1. Prophet 모델을 사용하기 위한 전처리
-**데이터프레임 이미지 넣어주세요**
+#### 4-1. Prophet 모델을 사용하기 위한 전처리
+
+<img width="190" alt="스크린샷 2024-06-17 오후 11 09 12" src="https://github.com/kimgusan/Time_series/assets/156397911/cc7784e9-1f32-4171-8bc9-6770d3498e9c">
+
 
 <details>
     <summary>날짜 인덱스 독립변수 선언 및 컬럼명 변경</summary>
@@ -372,9 +443,12 @@
 
 </details>
 
-4-2. Prophet 파라미터 조정 없이 default 값으로 훈련 진행
-**이미지 넣어주세요!**  
-**이미지 넣어주세요!**
+#### 4-2. Prophet 파라미터 조정 없이 default 값으로 훈련 진행
+
+<img width="887" alt="스크린샷 2024-06-17 오후 11 10 35" src="https://github.com/kimgusan/Time_series/assets/156397911/6cec2be2-d2fe-42d5-9ea6-ac947794b30c">
+<img width="1005" alt="스크린샷 2024-06-17 오후 11 11 09" src="https://github.com/kimgusan/Time_series/assets/156397911/3f070a3f-ad2f-40cc-b8c6-36c01d66ad2e">
+
+> 2020 년 이후 신뢰구간을 실측값이 신뢰구간을 벗어나는 부분 확인하여 파라미터 조정하는 방향으로 진행.
 
 <details>
     <summary>Prophet fit Code_Cycle01</summary>
@@ -410,10 +484,15 @@
 
 </details>
 
--   신뢰구간을 벗어나는 실측값들이 있어 파라미터 값 조정 후 추가 훈련 진행
-
-4-3. Prophet 파라미터 조정 후 훈련 진행.
+#### 4-3. Prophet 파라미터 조정 후 훈련 진행.
 예측 성능 지표 계산, 교차검증을 이용한 파라미터 확인
+
+<img width="532" alt="스크린샷 2024-06-17 오후 11 23 21" src="https://github.com/kimgusan/Time_series/assets/156397911/2fda7066-3548-4f83-be02-6ec6e5711c0e">
+<img width="898" alt="스크린샷 2024-06-17 오후 11 19 42" src="https://github.com/kimgusan/Time_series/assets/156397911/c10d92a1-1e8d-4f35-8e0a-acc4a682f479">
+<img width="975" alt="스크린샷 2024-06-17 오후 11 19 50" src="https://github.com/kimgusan/Time_series/assets/156397911/afa5e850-dc8b-4ae0-8c1a-074188204ba3">
+
+> 이전 모델과 비교하였을 때 실측값이 조금 더 신뢰구간에 가까워 진 부분 확인.
+> 예측 결과가 비정상적으로 불안정한 부분 확인, seasonality_mode를 변경하여 덧셈 방식으로 변경 후 추가 훈련 진행.
 
 -   changepoint_prior_scale=1,
 -   seasonality_prior_scale=10,
@@ -511,30 +590,37 @@
 
 </details>
 
-4-4. 데이터 훈련 날짜 조정 후 훈련 진행.
+#### 4-4. 데이터 훈련 날짜 조정 후 훈련 진행.
+
+<img width="877" alt="스크린샷 2024-06-17 오후 11 26 09" src="https://github.com/kimgusan/Time_series/assets/156397911/240f2321-9391-4222-94ff-9f3cb932d313">
+<img width="994" alt="스크린샷 2024-06-17 오후 11 26 32" src="https://github.com/kimgusan/Time_series/assets/156397911/7ade2071-8278-4574-9d59-20f0b14c5690">
+<img width="982" alt="스크린샷 2024-06-17 오후 11 26 42" src="https://github.com/kimgusan/Time_series/assets/156397911/2637e392-5b9d-4d89-94b1-fd3b440449a4">
+<img width="991" alt="스크린샷 2024-06-17 오후 11 26 50" src="https://github.com/kimgusan/Time_series/assets/156397911/94e54e9c-9b14-468a-b322-25fa9fe234ed">
+<img width="983" alt="스크린샷 2024-06-17 오후 11 27 00" src="https://github.com/kimgusan/Time_series/assets/156397911/5fb6bc10-0257-4d6a-8dc9-ce70d7efce8c">
+
+
 
 -   2020년부터 훈련 진행
 -   multiplicative -> additive 변경
     (누적값이 아닌 곱셈 값으로 했을 때 예측 결과가 이상한 부분 확인)
+> Multiplicative 방식이 적용될 경우, 데이터의 값이 크면 계절성 효과도 그만큼 크게 적용되어, 예측 값의 변동폭이 심해집니다.  
+> 반대로, Additive 방식은 데이터의 값이 크더라도 계절성 효과가 일정하게 유지되어 예측 값의 변동폭이 안정적으로 유지됩니다.
 -   changepoint_prior_scale=0.05,
 -   seasonality_prior_scale=10,
 -   seasonality_mode='additive'
--   mape = 0.117238
-    > > pre_l_df = pre_l_df['2020':].reset_index()
-    > > **이미지필수!!** > > **이전 훈련 모델과 비교하여 이미지 표기할 것!**
-
-4-5. 로그를 취해 수치 분포를 정규분포에 가깝게 만 든 후 훈련 진행
-**이미지 추가**
-
--   신뢰구간에 대해서 실측값들이 가까워 지는 양상을 보였으나 오히려 예측의 신뢰구간 분포가 매우 커진 부분을 확인할 수 있다.
+-   mape = 0.117238 (기존 multiplicative 사용했을 때 보다 약 0.3 수치가 감소)
+> pre_l_df = pre_l_df['2020':].reset_index()
 
 ### 5. 예측 결과 분석 및 설명
 
 -   금 가격과 리튬 ETF를 비교한 결과, 리튬 ETF에서 특정 시점을 기점으로 큰 변동(shock)이 발생한 것을 확인할 수 있었습니다
--   2020년 이전에는 리튬 ETF가 안정적인 모습을 보였으나, 2020년 이후 전기차 생산량이 급증하면서 해당 ETF 종목의 가격이 크게 상승했습니다.  
+-   2018년 이전에는 리튬 ETF가 안정적인 모습을 보였으나, 2018년 이후 전기차 생산량이 급증하면서 해당 ETF 종목의 가격이 크게 상승했습니다.  
     이후 시간이 지남에 따라 다시 안정화되는 경향을 보이고 있습니다.
 
-**링크에서 사진복사**
+<img width="692" alt="스크린샷 2024-06-17 오후 11 33 03" src="https://github.com/kimgusan/Time_series/assets/156397911/5e340d17-ff14-46f2-bfcb-4220fa8571a2">
+
+<img width="963" alt="스크린샷 2024-06-17 오후 11 30 54" src="https://github.com/kimgusan/Time_series/assets/156397911/71fa9adf-4606-4a18-b379-6368d73998f6">
+출처: https://www.weforum.org/agenda/2021/01/electric-vehicles-breakthrough-tesla-china
 
 -   ARIMA 모델을 사용하여 2013년부터 2024년까지의 데이터를 평가한 결과, 예측 오차가 x 정도로 나타났으며 모델 평가가 좋았다고 판단됩니다.
 -   Prophet 모델을 사용하여 2025년 리튬 ETF를 예측한 결과, 시간이 지날수록 ETF 가격이 하락하는 경향을 보였습니다.  
