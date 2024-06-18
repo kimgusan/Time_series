@@ -305,7 +305,7 @@
     - Ljung-Box 검정 (Prob(Q)): 잔차가 완전히 독립적이지 않을 가능성을 시사합니다.
     - Jarque-Bera 검정 (Prob(JB)): 잔차가 정규성을 따르지 않습니다.
     - Heteroskedasticity 검정 (Prob(H)): 잔차의 분산이 일정하지 않습니다.
-    - Skewness and Kurtosis: 왜도는 거의 대칭적이지만, 첨도는 매우 높아 분포가 뾰족합니다.
+    - Skew and Kurtosis: 왜도는 거의 대칭적으로 판단되지만, 첨도는 매우 높아 분포가 뾰족합니다.
 
     결과
     - 장기 투자: 높은 Kurtosis와 낮은 Skewness는 데이터가 일정하지 않고 변동성이 클 수 있음을 시사합니다. 장기 투자는 고위험일 수 있습니다.
