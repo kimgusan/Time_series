@@ -143,7 +143,7 @@
 
 #### 2-5. 리튬 ETF 차분 진행 시 정상성을 띄는 그래프 확인.
 
-<img width="978" alt="스크린샷 2024-06-17 오후 5 21 19" src="https://github.com/kimgusan/Time_series/assets/156397911/bc3e7e12-bd9d-4cf3-be4f-bb43a0231265">
+<img width="978" alt="스크린샷 2024-06-17 오후 5 21 19" src="https://github.com/kimgusan/Time_series/assets/156397911/bc3e7e12-bd9d-4cf3-be4f-bb43a0231265">  
 > 해당 데이터를 사용하기 위해 비정상 시계열에서 차분을 사용하여 정상 시계열 데이터로 변경하였을 때 어느정도 부분이 나타나는 것을 확인.
 
 #### 2-6. 리튬 ETF에 대하여 SMA를 적용하여 골든 크로스, 데드크로스 확인.
