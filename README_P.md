@@ -19,7 +19,7 @@
     import yfinance as yf
     import pandas as pd
 
-    # 금 가격
+    # 금 ETF
     gold_ticker = 'GLD'
     g_df = yf.download(gold_ticker, start='2013-01-01')['Adj Close'].round(4)
 
@@ -38,7 +38,7 @@
 
 </details>
 
-#### 1-1. 금 가격과 리튬 ETF 시계열 데이터 유형 확인.
+#### 1-1. 금 ETF과 리튬 ETF 시계열 데이터 유형 확인.
 
 <img width="993" alt="스크린샷 2024-06-17 오후 5 08 11" src="https://github.com/kimgusan/Time_series/assets/156397911/bc9087f2-ab7d-4ba0-8b79-f46708fe6076">
 
@@ -74,7 +74,7 @@
 
 </details>
 
-#### 2-1. 금 가격과 리튬 ETF 시계열 그래프 유형 확인(ACF, PACF 활용).
+#### 2-1. 금 ETF과 리튬 ETF 시계열 그래프 유형 확인(ACF, PACF 활용).
 
 <img width="876" alt="스크린샷 2024-06-17 오후 5 09 55" src="https://github.com/kimgusan/Time_series/assets/156397911/b6efbb22-bb03-4c0c-b76a-e1f73dc4189d">
 
@@ -83,14 +83,14 @@
 > 금과 리튬 ETF 시계열 데이터 모두 정상성을 띄지 않는 비정상 시계열 데이터임을 확인.  
 > 이후 모델 평가 진행 시 차분을 통한 데이터 유형 변경 필요.
 
-#### 2-2. 금 가격과 리튬 ETF 변화율 확인.
+#### 2-2. 금 ETF과 리튬 ETF 변화율 확인.
 
 <img width="430" alt="스크린샷 2024-06-17 오후 5 22 38" src="https://github.com/kimgusan/Time_series/assets/156397911/df26f566-b06d-4610-9ea0-38a09d4fe981">
 
 > 금보다는 리튬 ETF의 변화율 큰 부분 확인.
 
 <details>
-    <summary>금 가격과 리튬 ETF 시계열 데이터 변화율 및 수익률 확인.</summary>
+    <summary>금 ETF과 리튬 ETF 시계열 데이터 변화율 및 수익률 확인.</summary>
 
     # 변화율! 확인
     c_df.pct_change().mean().plot(kind='bar',figsize=(5,5), grid=True)
@@ -127,13 +127,13 @@
 
 </details>
 
-#### 2-3. 금 가격과 리튬 ETF 다중공산성 확인.
+#### 2-3. 금 ETF과 리튬 ETF 다중공산성 확인.
 
 <img width="170" alt="스크린샷 2024-06-17 오후 5 17 01" src="https://github.com/kimgusan/Time_series/assets/156397911/86d4226d-69dc-4762-8af9-26eb1a1b7a71">
 
-> 금 가격과 리튬 ETF에 대해서는 다중공산성이 존재 하지 않는 것으로 확인.
+> 금 ETF과 리튬 ETF에 대해서는 다중공산성이 존재 하지 않는 것으로 확인.
 
-#### 2-4. 금 가격과 리튬 ETF 일간 & 월간 수익률 확인.
+#### 2-4. 금 ETF과 리튬 ETF 일간 & 월간 수익률 확인.
 
 <img width="894" alt="스크린샷 2024-06-17 오후 5 26 10" src="https://github.com/kimgusan/Time_series/assets/156397911/c5d6f557-4e77-4a52-bff8-0584c7ef5608">
 <img width="894" alt="스크린샷 2024-06-17 오후 5 27 15" src="https://github.com/kimgusan/Time_series/assets/156397911/002537a5-82ca-48c4-bac6-95f6c0306a2a">
@@ -612,7 +612,7 @@
 
 ### 5. 예측 결과 분석 및 설명
 
--   금 가격과 리튬 ETF를 비교한 결과, 리튬 ETF에서 특정 시점을 기점으로 큰 변동(shock)이 발생한 것을 확인할 수 있었습니다
+-   금 ETF과 리튬 ETF를 비교한 결과, 리튬 ETF에서 특정 시점을 기점으로 큰 변동(shock)이 발생한 것을 확인할 수 있었습니다
 -   2018년 이전에는 리튬 ETF가 안정적인 모습을 보였으나, 2018년 이후 전기차 생산량이 급증하면서 해당 ETF 종목의 가격이 크게 상승했습니다.  
     이후 시간이 지남에 따라 다시 안정화되는 경향을 보이고 있습니다.
 
